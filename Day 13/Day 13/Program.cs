@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Day_13
 {
@@ -7,12 +8,18 @@ namespace Day_13
         static void Main(string[] args)
         {
             var lines = File.ReadAllLines("input.txt");
+            Part1(lines);
+            Part2(lines);
 
+        }
+
+        static void Part1(string[] lines)
+        {
             var parser = new Parser();
 
             var index = 1;
             var sum = 0;
-            for (var i = 0; i < lines.Length; i+=3)
+            for (var i = 0; i < lines.Length; i += 3)
             {
                 var firstLineParsed = parser.ParseLine(lines[i]);
                 var secondLineParsed = parser.ParseLine(lines[i + 1]);
@@ -25,16 +32,37 @@ namespace Day_13
 
                 index++;
             }
-
             Console.WriteLine($"Solution Part 1: {sum}");
         }
 
-        
+        static void Part2(string[] lines)
+        {
+            var parser = new Parser();
+
+            List<ListElement> listElements = new(); 
+            foreach (var line in lines.Where(x => !string.IsNullOrWhiteSpace(x)))
+            {
+                listElements.Add(parser.ParseLine(line));
+            }
+
+            var marker1 = parser.ParseLine("[[2]]");
+            var marker2 = parser.ParseLine("[[6]]");
+
+            listElements.Add(marker1);
+            listElements.Add(marker2);
+
+            listElements.Sort();
+
+            var index1 = listElements.IndexOf(marker1) + 1;
+            var index2 = listElements.IndexOf(marker2) + 1;
+
+            Console.WriteLine($"Solution Part 2: {index1*index2}");
+        }
     }
 
     class ElementComparer
     {
-        public int CompareElements(IElement firstElement, IElement secondElement)
+        public int CompareElements(Element firstElement, Element secondElement)
         {
             if (firstElement is IntegerElement firstIntegerElement &&
                 secondElement is IntegerElement secondIntegerElement)
@@ -64,7 +92,7 @@ namespace Day_13
             return CompareElements(firstListElementCreated, secondListElementCreated);
         }
 
-        ListElement EnsureIsListElement(IElement element)
+        ListElement EnsureIsListElement(Element element)
         {
             if (element is ListElement le)
             {
@@ -84,11 +112,15 @@ namespace Day_13
         }
     }
 
-    interface IElement
+    abstract class Element : IComparable<Element>
     {
+        public int CompareTo(Element? other)
+        {
+            return new ElementComparer().CompareElements(this, other!);
+        }
     }
 
-    class IntegerElement : IElement
+    class IntegerElement : Element
     {
         public int Value { get; set; }
 
@@ -109,9 +141,9 @@ namespace Day_13
         }
     }
 
-    class ListElement : IElement
+    class ListElement : Element
     {
-        public List<IElement> Elements { get; init;  } = new();
+        public List<Element> Elements { get; init;  } = new();
 
         public static (ListElement listElement, int endPositionInclusive) Parse(char[] line, int startPosition)
         {
