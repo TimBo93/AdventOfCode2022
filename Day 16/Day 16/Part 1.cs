@@ -4,9 +4,9 @@ using System.Text.RegularExpressions;
 
 namespace Day_16;
 
-internal class Program
+internal class ProgramPart1
 {
-    private static void Main(string[] args)
+    private static void MainPart1(string[] args)
     {
         var nodes = new List<Node>();
 
@@ -64,7 +64,8 @@ internal class Solver
 
             if (variant.RemainingTime == 0)
             {
-                // Solution here
+                Console.WriteLine($"Solution Part 1: {variant.Score}");
+                return;
             }
 
             foreach (var neighbor in _neighborsEnumerator.GetAllNeighbors(variant))
@@ -152,7 +153,7 @@ internal class Variant
         OpenedNodes = openedNodes;
         CurrentlyAtNode = currentlyAtNode;
         WastedPoints = wastedPoints;
-        Map = map;  
+        Map = map;
     }
 
     public int RemainingTime { get; }
